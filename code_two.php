@@ -1,167 +1,27 @@
-<?php
-/**
- * PHP 代码缺陷检测系统 - 测试用例
- * 此文件包含多种常见的 PHP 代码缺陷，用于测试缺陷检测系统
- */
 
-// ==================== 1. SQL 注入漏洞 ====================
-function getUserById($id) {
-    // 危险：直接拼接用户输入到 SQL 查询
-    $query = "SELECT * FROM users WHERE id = " . $id;
-    $result = mysql_query($query);
-    return mysql_fetch_array($result);
-}
-
-function searchUsers($keyword) {
-    // 危险：未使用预处理语句
-    $query = "SELECT * FROM users WHERE name LIKE '%" . $_GET['keyword'] . "%'";
-    return mysql_query($query);
-}
-
-// ==================== 2. XSS 跨站脚本漏洞 ====================
-function displayUserInput() {
-    // 危险：直接输出用户输入，未转义
-    echo $_GET['name'];
-    echo $_POST['comment'];
-    print $_REQUEST['message'];
-}
-
-function showWelcome() {
-    $username = $_GET['user'];
-    // 危险：在 HTML 中直接输出
-    echo "<h1>欢迎, " . $username . "</h1>";
-}
-
-// ==================== 3. 文件包含漏洞 ====================
-function includeFile() {
-    // 危险：直接使用用户输入作为文件路径
-    $file = $_GET['page'];
-    include($file . '.php');
-    
-    // 危险：远程文件包含
-    require($_POST['template']);
-}
-
-// ==================== 4. 密码明文存储 ====================
-function registerUser($username, $password) {
-    // 危险：密码明文存储
-    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-    mysql_query($sql);
-}
-
-function updatePassword($userId, $newPassword) {
-    // 危险：未加密存储密码
-    $query = "UPDATE users SET password = '$newPassword' WHERE id = $userId";
-    mysql_query($query);
-}
-
-// ==================== 5. 未关闭数据库连接 ====================
-function connectDatabase() {
-    // 危险：未关闭数据库连接
-    $conn = mysql_connect("localhost", "root", "password");
-    $db = mysql_select_db("mydb", $conn);
-    // 缺少 mysql_close($conn);
-}
-
-function queryData() {
-    $mysqli = new mysqli("localhost", "user", "pass", "database");
-    $result = $mysqli->query("SELECT * FROM users");
-    // 危险：未关闭连接
-    // 应该调用 $mysqli->close();
-}
-
-// ==================== 6. 未过滤用户输入 ====================
-function processForm() {
-    // 危险：未验证和过滤输入
-    $email = $_POST['email'];
-    $age = $_GET['age'];
-    $file = $_FILES['upload']['name'];
-    
-    // 直接使用未过滤的输入
-    $sql = "INSERT INTO data (email, age) VALUES ('$email', $age)";
-    move_uploaded_file($_FILES['upload']['tmp_name'], $file);
-}
-
-// ==================== 7. 死循环风险 ====================
-function infiniteLoop() {
-    // 危险：没有退出条件的循环
-    while(true) {
-        // 没有 break 或 return
-        processData();
-    }
-}
-
-function recursiveFunction($n) {
-    // 危险：没有终止条件的递归
-    return recursiveFunction($n + 1);
-}
-
-// ==================== 8. 数组越界 ====================
-function accessArray() {
-    $arr = array(1, 2, 3);
-    // 危险：可能越界
-    $value = $arr[10];
-    
-    // 危险：未检查数组键是否存在
-    $data = $_GET['data'];
-    $result = $data['key'];
-}
-
-// ==================== 9. 空指针/空值引用 ====================
-function processData() {
-    // 危险：未检查变量是否为 null
-    $user = getUserById($_GET['id']);
-    echo $user['name']; // $user 可能为 null
-    
-    // 危险：未检查文件是否存在
-    $content = file_get_contents($_GET['file']);
-    echo $content;
-}
-
-// ==================== 10. 条件判断逻辑错误 ====================
-function checkPermission($userId) {
-    // 危险：逻辑错误，应该是 == 而不是 =
-    if ($userId = 1) {
-        return true; // 这总是返回 true
-    }
-    
-    // 危险：错误的比较
-    if ($userId == "admin") {
-        // 应该使用 === 进行严格比较
-    }
-}
-
-// ==================== 11. 重复数据库查询 ====================
-function getUserInfo($userId) {
-    // 危险：在循环中重复查询数据库
-    for ($i = 0; $i < 100; $i++) {
-        $user = mysql_query("SELECT * FROM users WHERE id = $userId");
-        // 应该先查询一次，然后在循环中使用
-    }
-}
 
 // ==================== 12. 大量循环嵌套 ====================
-function nestedLoops() {
+函数nestedLoops() {
     // 危险：三层嵌套循环，性能问题
-    for ($i = 0; $i < 1000; $i++) {
-        for ($j = 0; $j < 1000; $j++) {
-            for ($k = 0; $k < 1000; $k++) {
+For ($i = 0; $i < 1000; $i) {
+For ($j = 0; $j < 1000; $j) {
+For ($k = 0; $k < 1000; $k) {
                 // 大量计算
-                $result = $i * $j * $k;
+$result = $i * $j * $k；
             }
         }
     }
 }
 
 // ==================== 13. 大文件一次性读取 ====================
-function readLargeFile() {
+readLargeFile() {
     // 危险：一次性读取大文件到内存
     $content = file_get_contents('huge_file.txt'); // 可能几GB的文件
     processContent($content);
 }
 
 // ==================== 14. 未使用缓存 ====================
-function getExpensiveData() {
+getExpensiveData() {
     // 危险：每次都执行昂贵的操作
     $data = expensiveDatabaseQuery();
     return $data; // 应该使用缓存
@@ -176,7 +36,7 @@ $userName = ""; // 应该使用 $userName
 $user_name = ""; // 不符合 PSR 规范
 
 // ==================== 16. 函数行数过长 ====================
-function longFunction() {
+函数longFunction() {
     // 危险：函数过长，应该拆分
     $step1 = doStep1();
     $step2 = doStep2();
@@ -189,7 +49,7 @@ function longFunction() {
     $step9 = doStep9();
     $step10 = doStep10();
     $step11 = doStep11();
-    $step12 = doStep12();
+$step12 = doStep12()；
     $step13 = doStep13();
     $step14 = doStep14();
     $step15 = doStep15();
@@ -203,7 +63,7 @@ function longFunction() {
 }
 
 // ==================== 17. 缺少必要注释 ====================
-function complexAlgorithm($data) {
+complexAlgorithm($data) {
     // 危险：复杂逻辑缺少注释说明
     $result = 0;
     for ($i = 0; $i < count($data); $i++) {
